@@ -1,0 +1,98 @@
+extends layout
+block emplacement
+  .container
+    #myPopup(class='modal fade', role='dialog')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h4.modal-title Ajouter votre equipe
+            button(type='button', class='close', data-dismiss='modal') &times;
+          .modal-body
+            p
+              | Pour ajouter votre équipe, merci de remplir les champs suivant.
+              form(class='form-group' id='form-ajoutEquipe' action='/ajoutEquipe' method='post')
+                input(type='text', class='form-control', id='equipeName', placeholder='Nom Equipe')
+                input(type='button', class='btn btn-primary', onclick='ajoutEquipe()', value='Je valide')
+                div(class='alert alert-block alert-danger' id='alertPopup' style='display: none')
+                  h4 Erreur !
+                  | Vous devez mettre un nom d'équipe !
+          .modal-footer
+            button(type='button', class='btn btn-default', data-dismiss='modal') Close
+    .jumbotron
+      .container
+        h1.text-center Page d'inscription au Tournoi
+        p
+          | Pour vous inscrire, merci de remplir les champs ci-dessous. Toute inscription incomplete ne pourra etre acceptee.
+        p
+          a.btn.btn-primary.btn-lg(role='button') En savoir plus &raquo;
+        .row
+          .col-md-3
+          .col-md-3
+            form(class='form-group' id='form-inscrip' action='/validInscrip' method='post', enctype='multipart/form-data')
+              input(type='text', class='form-control', name='prenom', id='prenom', placeholder='Prénom :', value=firstName)
+              input(type='text', class='form-control', name='nom', id='nom', placeholder='Nom :', value=lastName)
+              input(type='date', class='form-control', name='dateNaiss', id='dateNaiss', placeholder='Date de Naissance :', value=dateNaiss)
+              input(type='file', name='displayImage', id='displayImage')
+              .row
+                .col-md-9
+                  select(class='form-control', align='left', id='team' name='team' onchange='afficheList()')
+                    option(value=null)
+                    each equipe in equipes
+                      if((selectTeam != null) && (equipe.name == selectTeam))
+                        option(value=equipe.name selected) #{equipe.name}
+                      else
+                        option(value=equipe.name) #{equipe.name}
+                .col-md-2.col-md-offset-1
+                  button(type='button', class='btn btn-primary btn-sm', data-toggle='modal' data-target='#myPopup') +
+              .row(class='text-center')
+                input(type='button', value='Submit', class='btn btn-primary', onclick='checkAnswer()')
+                div(class='alert alert-block alert-danger' id='alert' style='display: none')
+                  h4 Erreur !
+                  | Vous devez remplir toutes les cases !
+          #joueurTeam.col-md-3
+          .col-md-3		  
+    .container
+      // Example row of columns
+      .row
+        .col-md-4
+        .col-md-4
+        .col-md-4
+      hr
+    script(type='text/javascript').
+      function ajoutEquipe(){
+        if ($('#equipeName').val() == '') {
+          $('#alertPopup').show('slow').delay(4000).hide('slow');
+          $('#equipeName').addClass('alert-danger');
+        }
+        else {
+          $.post("/ajoutEquipe", {equipeName: $('#equipeName').val(), max : '8'}, function(data){
+              $('#joueurTeam').html(data);
+            }
+          )
+          $('#form-ajoutEquipe').submit();
+        }
+      }
+      function checkAnswer() {
+        if((document.getElementById('prenom').value.toLowerCase() == '') || (document.getElementById('nom').value.toLowerCase() == '') || (document.getElementById('team').value.toLowerCase() == '')) {
+          if ($('#nom').val() == '') $('#nom').addClass('alert-danger');
+          if ($('#prenom').val() == '') $('#prenom').addClass('alert-danger');
+          if ($('#team').val() == '') $('#team').addClass('alert-danger');
+          $('div.alert').show('slow').delay(4000).hide('slow');
+        }
+        else {
+          submitResult();
+        }
+      }
+      function afficheList() {
+          $.post("/clickTeam", {team: $('#team').val(), nom : '#nom'}, function(data){
+              $('#joueurTeam').html(data);
+            }
+          )
+      }
+      function loadData() {
+        document.getElementById('nom').value(lastName);
+      }
+      function submitResult() {
+        document.getElementById('form-inscrip').submit();
+      }
+      window.onload = loadData();

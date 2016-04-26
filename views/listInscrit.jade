@@ -1,0 +1,100 @@
+extends layout
+block emplacement
+ .container
+  .jumbotron
+    .container
+      h3.text-center Liste des inscrits au Tournoi
+      .row        
+        .col-md-2
+          h4 Id
+        .col-md-2
+          h4 Nom
+        .col-md-3
+          h4 Prenom
+        .col-md-3
+          h4 Equipe
+        .col-md-2
+          h4 Modification
+        each joueur in participants
+          .row(id=joueur.idParticipants)
+            .col-md-2
+              h6(id='id') #{joueur.idParticipants}
+            .col-md-2
+              h6(id='nom') #{joueur.nomParticipants}
+            .col-md-3
+              h6(id='prenom') #{joueur.prenomParticipants}
+            .col-md-3
+              h6(id='nomEquipe') #{joueur.nomEquipe}
+            .col-md-2
+              input(type='checkbox', name='modification', id='cochage', value=''+joueur.idParticipants+'', onClick="checkAnswer(this.value)")
+              button(class='glyphicon glyphicon-ok', value=''+joueur.idParticipants+'', id='validation', style='display: none', onClick="validModifLigne(this.value)")
+              button(class='glyphicon glyphicon-remove', value=''+joueur.idParticipants+'', id='suppression', style='display: none', onClick="supprLigne(this.value)")			  
+  script(type='text/javascript').
+    function checkAnswer(id){
+      if ($('#'+id).find("#cochage").prop('checked')==true){
+        $('<input>').attr('type', 'text').attr('id', 'id').attr('value', $('#'+id).find("#id").text()).replaceAll($('#'+id).find("#id"));
+        $('<input>').attr('type', 'text').attr('id', 'nom').attr('value', $('#'+id).find("#nom").text()).replaceAll($('#'+id).find("#nom"));
+        $('<input>').attr('type', 'text').attr('id', 'prenom').attr('value', $('#'+id).find("#prenom").text()).replaceAll($('#'+id).find("#prenom"));
+        $.ajax({
+          url: "/equipes/",
+          type: "GET",
+          dataType:"json",
+          success: function(data){
+            var sel = $('<select></select>').attr('id', 'nomEquipe').attr('name', 'nomEquipe').attr('selected', $('#'+id).find("#nomEquipe").text()) ;
+            for (var equipe in data){
+              if($('#'+id).find("#nomEquipe").text() == data[equipe].nomEquipe) sel.append("<option selected>" + data[equipe].nomEquipe + "</option>");			
+              else sel.append("<option>" + data[equipe].nomEquipe + "</option>");
+            }
+            sel.replaceAll($('#'+id).find("#nomEquipe"));
+          }
+        });
+        $('#'+id).find("#validation").show();
+        $('#'+id).find("#suppression").show();	
+      }else{
+        $('<h6 id="id">'+$('#'+id).find("#id").val()+'</h6>').replaceAll($('#'+id).find("#id"));
+        $('<h6 id="nom">'+$('#'+id).find("#nom").val()+'</h6>').replaceAll($('#'+id).find("#nom"));
+        $('<h6 id="prenom">'+$('#'+id).find("#prenom").val()+'</h6>').replaceAll($('#'+id).find("#prenom"));
+        $('<h6 id="nomEquipe">'+$('#'+id).find("#nomEquipe").val()+'</h6>').replaceAll($('#'+id).find("#nomEquipe"));
+        $('#'+id).find("#validation").hide();
+        $('#'+id).find("#suppression").hide();		
+      }
+    }
+    function validModifLigne(id){
+      $.ajax({
+        url: "/equipes/"+$('#'+id).find("#nomEquipe").val(),
+        type: "GET",
+        dataType:"json",
+        success: function(data){
+          $.ajax({
+            url: "/participants/"+$('#'+id).find('#id').val(),
+            type: "PUT",
+            data: {
+              idParticipants: $('#'+id).find('#id').val(),
+              nomParticipants: $('#'+id).find('#nom').val(),
+              prenomParticipants: $('#'+id).find('#prenom').val(),
+              idEquipe: data
+            },
+            dataType:"json",
+            success: function(data){
+              $('<h6 id="id">'+$('#'+id).find("#id").val()+'</h6>').replaceAll($('#'+id).find("#id"));
+              $('<h6 id="nom">'+$('#'+id).find("#nom").val()+'</h6>').replaceAll($('#'+id).find("#nom"));
+              $('<h6 id="prenom">'+$('#'+id).find("#prenom").val()+'</h6>').replaceAll($('#'+id).find("#prenom"));
+              $('<h6 id="nomEquipe">'+$('#'+id).find("#nomEquipe").val()+'</h6>').replaceAll($('#'+id).find("#nomEquipe"));
+              $('#'+id).find("#validation").hide();
+              $('#'+id).find("#suppression").hide();
+              $('#'+id).find("#cochage").removeAttr("checked");
+            }
+          });
+        }		
+      });
+    }
+    function supprLigne(id){
+      $.ajax({
+        url: "/participants/"+$('#'+id).find('#id').val(),
+        type: "DELETE",
+        dataType:"json",
+        success: function(data){
+          $('#'+id).remove();
+        }
+      });
+    }		

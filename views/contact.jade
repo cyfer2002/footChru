@@ -1,0 +1,77 @@
+extends layout
+block emplacement
+    #myPopup(class='modal fade', role='dialog')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h4.modal-title Popup de contact
+            button(type='button', class='close', data-dismiss='modal') &times;
+          .modal-body
+            p
+              | Pour ajouter votre équipe, merci de remplir les champs suivant.		  
+          .modal-footer
+            button(type='button', class='btn btn-default', data-dismiss='modal') Close
+    .container
+      .jumbotron
+          .row
+            .col-md-3
+            .col-md-6
+                .row
+                  h2(class='text-center') Contact
+                  h2(class='text-center')
+                    small
+                      em Pour me contacter, merci de remplir le formulaire
+            .col-md-3
+      .row
+        .col-md-4
+          .jumbotron
+            address
+              h4
+                small
+                  em Adresse
+        .col-md-8
+          form(class="well" id="formulContact" action="/validContact" method="get")
+            legend Me laisser un message
+            fieldset
+              .row
+                .col-md-4
+                  .form-group
+                    label(class="sr-only" for="text") Texte
+                    input(type="text" class="form-control" name="prenom" id="prenom" placeholder="Votre prénom :")
+                    br
+                    input(type="text" class="form-control" name="nom" id="nom" placeholder="Votre nom :")
+                    br
+                    label(class="sr-only" for="text")
+                    input(type="text" class="form-control" name="email" id="email" placeholder="Votre e-mail :")
+                .col-md-5.col-md-offset-1
+                  h4 Comment m'avez-vous trouvé ?
+                  .radio
+                    label(for="ami" class="radio")
+                      input(type="radio" name="origine" value="ami" id="ami")
+                      |  Par un ami
+                  .radio
+                    label(for="web" class="radio")
+                      input(type="radio" name="origine" value="web" id="web")
+                      |  Sur le web
+                  .radio
+                    label(for="hasard" class="radio")
+                      input(type="radio" name="origine" value="hasard" id="hasard")
+                      |  Par hasard
+                  .radio
+                    label(for="autre" class="radio")
+                      input(type="radio" name="origine" value="autre" id="autre")
+                      |  Autre...
+              label(for="textarea") Votre message :
+              textarea(name="textarea" id="textarea" class="form-control" rows="4")
+              p(class="help-block") Vous pouvez agrandir la fenêtre
+              button(class="btn btn-primary" type="submit") Envoyer
+              .alert.alert-block.alert-danger(style="display: none")
+                h4 Erreur !
+                | Vous devez remplir toutes les cases !
+      .container
+        .row
+          .col-md-4
+          .col-md-4
+          .col-md-4
+        hr
+    script(type='text/javascript').

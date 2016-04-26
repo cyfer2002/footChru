@@ -1,0 +1,6 @@
+include includes/head
+  h4.text-center Liste des joueurs : #{selectTeam}
+    p
+    each joueur in joueurs
+    .text-center #{joueur.nom} - #{joueur.prenom}
+    p

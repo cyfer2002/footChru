@@ -1,0 +1,112 @@
+extends layout
+block emplacement
+ .container
+  .jumbotron
+    .container
+      h3.text-center Liste des inscrits au Tournoi
+      .row
+        .col-md-1
+        .col-md-10
+          .row
+            .col-md-3
+              h4(class='text-center') Id
+            .col-md-3
+              h4(class='text-center') Nom
+            .col-md-3
+              h4(class='text-center') Prenom
+            .col-md-3
+              h4(class='text-center') Equipe
+          .row
+          .panel-group(id='accordion' role='tablist' aria-multiselectable='true')
+          each joueur in participants
+              .panel.panel-default
+                .panel-heading(role='tab' id='head'+joueur.idParticipants)
+                  h4(class='panel-title')
+                    a(role='button' data-toggle='collapse' data-parent='#accordion' href='#collapse'+joueur.idParticipants aria-expanded='true' aria-controls='collapse'+joueur.idParticipants)
+                      .row
+                        .col-md-3
+                          h6(id='id' class='text-center') #{joueur.idParticipants}
+                        .col-md-3
+                          h6(id='nom' class='text-center') #{joueur.nomParticipants}
+                        .col-md-3
+                          h6(id='prenom' class='text-center') #{joueur.prenomParticipants}
+                        .col-md-3
+                          h6(id='idEquipe' class='text-center') #{joueur.idEquipe}
+                .panel-collapse(class='collapse' role='tabpanel' id='collapse'+joueur.idParticipants aria-labelledby='head'+joueur.idParticipants)
+                  .panel-body
+                    .col-md-4
+                      img(src='./images/identite/'+joueur.lienPhoto id='cropbox' width='120' height='120' class='img-rounded')
+                    .col-md-8
+                      | Nom : #{joueur.nomParticipants}
+                      p
+                      | Prénom : #{joueur.prenomParticipants}
+                      p
+                      | Date de Naissance : 
+                      span= moment(joueur.dateNaiss).format("DD/MM/YYYY")
+                      p
+                      | Nom : #{joueur.nomParticipants}
+        .col-md-1
+  script(type='text/javascript').
+    function checkAnswer(id){
+      if ($('#'+id).find("#cochage").prop('checked')==true){
+        $('<input>').attr('type', 'text').attr('id', 'id').attr('value', $('#'+id).find("#id").text()).replaceAll($('#'+id).find("#id"));
+        $('<input>').attr('type', 'text').attr('id', 'nom').attr('value', $('#'+id).find("#nom").text()).replaceAll($('#'+id).find("#nom"));
+        $('<input>').attr('type', 'text').attr('id', 'prenom').attr('value', $('#'+id).find("#prenom").text()).replaceAll($('#'+id).find("#prenom"));
+        $.ajax({
+          url: "/equipes/",
+          type: "GET",
+          dataType:"json",
+          success: function(data){
+            var sel = $('<select></select>').attr('id', 'nomEquipe').attr('name', 'nomEquipe').attr('selected', $('#'+id).find("#nomEquipe").text()) ;
+            for (var equipe in data){
+              if($('#'+id).find("#nomEquipe").text() == data[equipe].nomEquipe) sel.append("<option selected>" + data[equipe].nomEquipe + "</option>");			
+              else sel.append("<option>" + data[equipe].nomEquipe + "</option>");
+            }
+            sel.replaceAll($('#'+id).find("#nomEquipe"));
+          }
+        });
+        $('#'+id).find("#validation").show();	
+      }else{
+        $('<h6 id="id">'+$('#'+id).find("#id").val()+'</h6>').replaceAll($('#'+id).find("#id"));
+        $('<h6 id="nom">'+$('#'+id).find("#nom").val()+'</h6>').replaceAll($('#'+id).find("#nom"));
+        $('<h6 id="prenom">'+$('#'+id).find("#prenom").val()+'</h6>').replaceAll($('#'+id).find("#prenom"));
+        $('<h6 id="nomEquipe">'+$('#'+id).find("#nomEquipe").val()+'</h6>').replaceAll($('#'+id).find("#nomEquipe"));
+        $('#'+id).find("#validation").hide();		
+      }
+    }
+    function validModifLigne(id){
+      $.ajax({
+        url: "/equipes/"+$('#'+id).find("#nomEquipe").val(),
+        type: "GET",
+        dataType:"json",
+        success: function(data){
+          $.ajax({
+            url: "/participants/"+$('#'+id).find('#id').val(),
+            type: "PUT",
+            data: {
+              idParticipants: $('#'+id).find('#id').val(),
+              nomParticipants: $('#'+id).find('#nom').val(),
+              prenomParticipants: $('#'+id).find('#prenom').val(),
+              idEquipe: data
+            },
+            dataType:"json",
+            success: function(data){
+              $('<h6 id="id">'+$('#'+id).find("#id").val()+'</h6>').replaceAll($('#'+id).find("#id"));
+              $('<h6 id="nom">'+$('#'+id).find("#nom").val()+'</h6>').replaceAll($('#'+id).find("#nom"));
+              $('<h6 id="prenom">'+$('#'+id).find("#prenom").val()+'</h6>').replaceAll($('#'+id).find("#prenom"));
+              $('<h6 id="nomEquipe">'+$('#'+id).find("#nomEquipe").val()+'</h6>').replaceAll($('#'+id).find("#nomEquipe"));
+              $('#'+id).find("#validation").hide();
+              $('#'+id).find("#cochage").removeAttr("checked");
+            }
+          });
+        }		
+      });
+    }
+    jQuery(function() {
+        jQuery('#cropbox').Jcrop();
+          onSelect:    showCoords,
+          bgColor:     'black',
+          bgOpacity:   .4,
+          setSelect:   [ 100, 100, 50, 50 ],
+          aspectRatio: 16 / 9
+    });
